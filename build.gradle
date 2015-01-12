@@ -9,6 +9,8 @@
 
 // Apply the java plugin to add support for Java
 apply plugin: 'java'
+apply plugin: 'maven'
+apply plugin: 'signing'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -17,7 +19,6 @@ repositories {
     jcenter()
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
     // The production code uses the SLF4J logging API at compile time
     compile 'org.slf4j:slf4j-api:1.7.7'
@@ -27,4 +28,62 @@ dependencies {
     // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     testCompile 'junit:junit:4.11'
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: 'ossrhUsername', password: 'ossrhPassword')
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: 'ossrhUsername', password: 'ossrhPassword')
+      }
+
+      pom.project {
+        name 'JFastParser'
+        packaging 'jar'
+        // optionally artifactId can be defined here 
+        description 'Very fast parsing of doubles and ints from a string'
+        url 'https://github.com/hughperkins/jfastparser'
+
+        scm {
+          connection 'scm:git:git@github.com:hughperkins/jfastparser.git'
+          developerConnection 'scm:git:git@github.com:hughperkins/jfastparser.git'
+          url 'https://github.com/hughperkins/jfastparser'
+        }
+
+        licenses {
+          license {
+            name 'Mozilla Public License, version 2.0'
+            url 'https://www.mozilla.org/MPL/2.0/'
+          }
+        }
+
+        developers {
+          developer {
+            id 'hughperkins'
+            name ''
+            email ''
+          }
+        }
+      }
+    }
+  }
 }
