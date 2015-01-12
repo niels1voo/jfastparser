@@ -1,9 +1,10 @@
 *.class
-target
+build/
+target/
+.gradle/
+.idea/
 
 # Package Files #
 *.jar
 *.war
 *.ear
-build/
-.gradle
